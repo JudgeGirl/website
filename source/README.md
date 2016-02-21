@@ -3,37 +3,38 @@ Judge Girl 批改娘簡易安裝手冊
 
 ## 準備工作 ##
 
-一台 Linux 作業系統，最好是 Ubuntu，CentOS 和 Debian 可能會沒有要建立沙盒的的環境。
+一台 Linux 作業系統，最好是 Ubuntu。CentOS 和 Debian 可能會沒有建立沙盒所需要的新版套件。
 
 ## 起步 ##
 
 假定現在給一台 Ubuntu 14.04 的主機，先增加兩個使用者帳號。
 
 ```
-$ adduser judgesister
-$ adduser butler
+# adduser judgesister
+# adduser butler
 ```
 
 ## 安裝套件 ##
 
 ```
-$ apt-get install cgroup-bin cgroup-lite libcgroup1
-$ apt-get install build-essential nodejs npm
-$ apt-get install mysql-server
+# apt-get install cgroup-tools
+# apt-get install build-essential nodejs npm
+# apt-get install mysql-server
 ```
 
-* `cgroup-bin cgroup-lite libcgroup1` 為 Ubuntu 上 cgroup 的相關套件，否則只存在 `/sys/fs/cgroup/systemd`，沙盒需要 `/sys/fs/cgroup/memory`。
+* `cgroup-tools` 為 Ubuntu 上 cgroup 的相關套件，沙盒需要 `/sys/fs/cgroup/memory/`。
 * `build-essential nodejs npm` 評測系統後台需使用 gcc 編譯器、前端使用 nodejs 和 npm 套件管理。
 * `mysql-server` 資料庫系統使用 MySQL。
 
 ## 安裝模組 ##
 
 ```
-$ git clone https://github.com/JudgeGirl/JudgeNode /home/judgesister/JudgeNode
-$ git clone https://github.com/JudgeGirl/Judge-receiver /home/judgesister/Judge-receiver
-$ git clone https://github.com/JudgeGirl/Judge-sender /home/judgesister/Judge-sender
-$ git clone https://github.com/JudgeGirl/Judge-MySQL /home/judgesister/Judge-MySQL
-$ git clone https://github.com/JudgeGirl/Judge-template /home/judgesister/Judge-template
+$ cd /home/judgesister/
+$ git clone https://github.com/JudgeGirl/JudgeNode
+$ git clone https://github.com/JudgeGirl/Judge-receiver
+$ git clone https://github.com/JudgeGirl/Judge-sender
+$ git clone https://github.com/JudgeGirl/Judge-MySQL
+$ git clone https://github.com/JudgeGirl/Judge-template
 ```
 
 系統大致上分成四個部份
@@ -87,7 +88,7 @@ mysql >> <copy Judge-MySQL/CREATE_TABLE.sql>
 由於 MySQL Library 不支援 python 3，但支持 python 2，安裝額外套件使得 MySQL 得以在 python 3 上運行。首先，安裝 `python3-dev`，等下 python3 安裝過程中會需要相關的套件。
 
 ```
-$ apt-get install python3-dev
+# apt-get install python3-dev
 ```
 
 接著，按照網路提供的[方案](http://stackoverflow.com/questions/12031151/how-to-install-mysqldb-with-python-3-2)解決。
@@ -112,10 +113,10 @@ apt-get install libmysqlclient-dev
 由於是遠端遙控，目前採用 ssh 遠端登入，要使用不需要密碼的方式登入遠端，假設從 `root@a.a.a.a` 登入到遠端的 `butler@b.b.b.b` 上 (意即用 root 身分執行 `./Judge-sender/start` 運行)
 
 ```
-root@a.a.a.a $ ssh-keygen -t rsa
-root@a.a.a.a $ scp ~/.ssh/id_rsa.pub butler@b.b.b.b:~/.ssh/
-root@a.a.a.a $ ssh butler@b.b.b.b
-butler@b.b.b.b $ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+root@a.a.a.a# ssh-keygen -t rsa
+root@a.a.a.a# scp ~/.ssh/id_rsa.pub butler@b.b.b.b:~/.ssh/
+root@a.a.a.a# ssh butler@b.b.b.b
+butler@b.b.b.b$ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 ```
 
 ### Judge-receiver ###
@@ -126,10 +127,9 @@ butler@b.b.b.b $ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 $ make -C /home/judgesister/Judge-receiver/slave/ clean
 $ make -C /home/judgesister/Judge-receiver/slave/
 $ cp -r /home/judgesister/Judge-receiver/slave/* /home/butler
-$ chown butler:butler /home/butler/butler
-$ chown butler:butler /home/butler/tiger
-$ chmod +s /home/butler/sandbox
-$ chmod +x /home/butler/butler
+# chown butler:butler /home/butler/butler
+# chown butler:butler /home/butler/tiger
+# chmod +s /home/butler/sandbox
 ```
 
 
@@ -199,7 +199,7 @@ butler@supermicro:~$ echo $PATH
 
 * 確定 server 上有 `cgroup` 功能，在某些舊 kernel 並沒有我們需要限制沙盒的功能 (目前部分版本的 CentOS 和 Debian 沒有支持)。  
 ```
-$ ls /sys/fs/cgroup/memory
+$ ls /sys/fs/cgroup/memory/
 ```
 
 確定 `memory.limit_in_bytes` 存在在清單中。(可以使用 `$ mount` 找到 `cgroup` 在哪個資料夾。)
